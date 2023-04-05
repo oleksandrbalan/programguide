@@ -6,24 +6,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -31,15 +25,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eu.wewox.minabox.MinaBox
+import eu.wewox.minabox.MinaBoxAlignmentPadding
+import eu.wewox.minabox.MinaBoxItem
+import eu.wewox.minabox.MinaBoxItem.Value.Absolute
+import eu.wewox.minabox.MinaBoxItem.Value.Relative
+import eu.wewox.minabox.rememberMinaBoxState
 import eu.wewox.programguide.ProgramGuide
 import eu.wewox.programguide.ProgramGuideItem
 import eu.wewox.programguide.ProgramGuideState
 import eu.wewox.programguide.demo.ui.theme.ProgramGuideTheme
-import eu.wewox.programguide.rememberProgramGuideState
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import java.util.Calendar.HOUR_OF_DAY
-import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,33 +47,37 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Column {
-                        val scope = rememberCoroutineScope()
-                        val state = rememberProgramGuideState {
-                            val index = Calendar.getInstance(Locale.getDefault()).get(HOUR_OF_DAY)
-                            val x = getTimelinePosition(index, Alignment.CenterHorizontally)
-                            Offset(x, 0f)
-                        }
-                        var programs by remember { mutableStateOf(createPrograms()) }
-
-                        Row {
-                            Button(onClick = { programs = createPrograms() }) {
-                                Text(text = "Shuffle")
-                            }
-                            Button(onClick = {
-                                scope.launch {
-                                    state.snapToProgram(index = 1000)
-                                }
-                            }) {
-                                Text(text = "Focus")
-                            }
-                        }
-
-                        Guide(
-                            state,
-                            programs,
-                            Modifier.weight(1f)
-                        )
+//                    List(PROGRAMS)
+//                    Column {
+//                        val scope = rememberCoroutineScope()
+//                        val state = rememberProgramGuideState {
+//                            val index = Calendar.getInstance(Locale.getDefault()).get(HOUR_OF_DAY)
+//                            val x = getTimelinePosition(index, Alignment.CenterHorizontally)
+//                            Offset(x, 0f)
+//                        }
+//                        var programs by remember { mutableStateOf(createPrograms()) }
+//
+//                        Row {
+//                            Button(onClick = { programs = createPrograms() }) {
+//                                Text(text = "Shuffle")
+//                            }
+//                            Button(onClick = {
+//                                scope.launch {
+//                                    state.snapToProgram(index = 1000)
+//                                }
+//                            }) {
+//                                Text(text = "Focus")
+//                            }
+//                        }
+//
+//                        Guide(
+//                            state,
+//                            programs,
+//                            Modifier.weight(1f)
+//                        )
+//                    }
+                    Box {
+                        MinaBoxSample()
                     }
                 }
             }
@@ -87,14 +87,48 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun List(programs: List<Program>, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
     LazyColumn(modifier, state) {
         items(
-            items = programs,
-            key = { it.title },
-        ) {
+            count = programs.size,
+        ) { index ->
+            val it = programs[index]
             Surface(
                 color = MaterialTheme.colorScheme.primary,
+                onClick = { scope.launch { state.scrollToItem(index) } },
+                modifier = Modifier.padding(1.dp)
+            ) {
+                Column(modifier = Modifier.padding(2.dp)) {
+                    Text(it.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("${it.start} - ${it.end}", fontSize = 12.sp)
+                }
+            }
+        }
+
+        items(
+            count = programs.size,
+        ) { index ->
+            val it = programs[index]
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                onClick = { scope.launch { state.scrollToItem(index) } },
+                modifier = Modifier.padding(1.dp)
+            ) {
+                Column(modifier = Modifier.padding(2.dp)) {
+                    Text(it.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("${it.start} - ${it.end}", fontSize = 12.sp)
+                }
+            }
+        }
+
+        items(
+            count = programs.size,
+        ) { index ->
+            val it = programs[index]
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                onClick = { scope.launch { state.scrollToItem(index) } },
                 modifier = Modifier.padding(1.dp)
             ) {
                 Column(modifier = Modifier.padding(2.dp)) {
@@ -180,6 +214,110 @@ private fun Guide(
                     text = "$it - ${it + 1}",
                     modifier = Modifier.padding(2.dp)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MinaBoxSample() {
+    val channelCount = 15
+    val programs = createPrograms()
+    val state = rememberMinaBoxState {
+        getOffset(300, Alignment.Center)
+    }
+    val scope = rememberCoroutineScope()
+    MinaBox(
+        state = state,
+        alignmentPadding = MinaBoxAlignmentPadding(start = 200f, top = 200f),
+        modifier = Modifier.padding(16.dp)
+    ) {
+        items(
+            items = PROGRAMS,
+            key = { it.title },
+            layoutInfo = {
+                MinaBoxItem(
+                    Offset(x = it.start * 300f + 200f, y = it.channel * 200f),
+                    Absolute((it.end - it.start) * 300f),
+                    Absolute(200f),
+                )
+            },
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(1.dp),
+                onClick = {
+                    scope.launch {
+                        state.animateTo(programs.indexOf(it))
+                    }
+                }
+            ) {
+                Column(modifier = Modifier.padding(2.dp)) {
+                    Text(
+                        it.title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text("${it.start} - ${it.end}", fontSize = 12.sp)
+                }
+            }
+        }
+
+        items(
+            count = channelCount,
+            layoutInfo = {
+                MinaBoxItem(
+                    Offset(0f, it * 200f),
+                    Absolute(200f),
+                    Absolute(200f),
+                    lockHorizontally = true,
+                )
+            }
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.surface,
+                shadowElevation = 4.dp,
+                border = BorderStroke(1.dp, Color.White),
+                onClick = {
+                    scope.launch {
+                        state.animateTo(it, Alignment.TopCenter)
+                    }
+                }
+            ) {
+                Text(
+                    text = "Ch #$it",
+                    modifier = Modifier.padding(2.dp)
+                )
+            }
+        }
+
+        items(
+            count = 2,
+            layoutInfo = {
+                if (it == 0) {
+                    MinaBoxItem(
+                        Offset(200f, 0f),
+                        Absolute(10f),
+                        Relative(1f),
+                        lockHorizontally = true,
+                        lockVertically = true,
+                    )
+                } else {
+                    MinaBoxItem(
+                        Offset(0f, 200f),
+                        Relative(1f),
+                        Absolute(10f),
+                        lockHorizontally = true,
+                        lockVertically = true,
+                    )
+                }
+            }
+        ) {
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                shadowElevation = 4.dp,
+            ) {
             }
         }
     }
