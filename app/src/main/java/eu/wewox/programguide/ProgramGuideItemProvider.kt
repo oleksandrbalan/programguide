@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalFoundationApi::class)
+@file:Suppress("all")
 
 package eu.wewox.programguide
 
@@ -22,7 +23,7 @@ internal fun rememberItemProvider(
     dimensions: ProgramGuideDimensions,
     content: ProgramGuideScope.() -> Unit
 ): ProgramGuideItemProvider {
-    val dimensionsPx = with(LocalDensity.current) { dimensions.roundToPx() }
+    val dimensionsPx = dimensions.roundToPx(LocalDensity.current)
     val scope = ProgramGuideScopeImpl().apply(content)
     return ProgramGuideItemProvider(
         scope.programs,

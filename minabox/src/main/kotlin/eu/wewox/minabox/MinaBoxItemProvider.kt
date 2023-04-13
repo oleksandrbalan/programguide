@@ -1,42 +1,54 @@
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package eu.wewox.minabox
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.layout.IntervalList
 import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.foundation.lazy.layout.getDefaultLazyLayoutKey
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.unit.Constraints
-import eu.wewox.minabox.MinaBoxItem.Value.Absolute
 import kotlin.math.max
 
+/**
+ * Remembers the item provider.
+ *
+ * @param content The lambda block which describes the content.
+ * @return An instance of the [MinaBoxItemProvider].
+ */
 @Composable
 internal fun rememberItemProvider(
     content: MinaBoxScope.() -> Unit
-): MinaBoxItemProvider {
-    val scope = MinaBoxScopeImpl().apply(content)
-    return MinaBoxItemProvider(scope.intervals)
-}
+): MinaBoxItemProvider =
+    remember(content) {
+        val scope = MinaBoxScopeImpl().apply(content)
+        MinaBoxItemProvider(scope.intervals)
+    }
 
+/**
+ * Implementation of the [LazyLayoutItemProvider]
+ *
+ * @property intervals The intervals with items registered in [MinaBoxScope].
+ */
 internal class MinaBoxItemProvider(
     private val intervals: IntervalList<MinaBoxItemContent>
 ) : LazyLayoutItemProvider {
 
-    val cache: Map<Int, MinaBoxItem> =
+    /**
+     * The cache map with items, associated by its global index.
+     */
+    val items: Map<Int, MinaBoxItem> =
         intervals.mapAll { index, localIndex, item -> index to item.layoutInfo(localIndex) }.toMap()
 
-    val itemsSize: Size by lazy {
+    /**
+     * The total size of the place occupied by items.
+     */
+    val size: Size = run {
         var maxX = 0f
         var maxY = 0f
 
-        cache.forEach { (_, info) ->
-            val width = if (info.width is Absolute) info.width.value else 0f
-            val height = if (info.height is Absolute) info.height.value else 0f
-            maxX = max(maxX, info.offset.x + width)
-            maxY = max(maxY, info.offset.y + height)
+        items.forEach { (_, info) ->
+            maxX = max(maxX, info.x + info.width.resolve())
+            maxY = max(maxY, info.y + info.height.resolve())
         }
 
         Size(maxX, maxY)
@@ -62,15 +74,24 @@ internal class MinaBoxItemProvider(
         }
     }
 
-    fun getItems(translateX: Float, translateY: Float, constraints: Constraints): Map<Int, Rect> {
+    /**
+     * Filters only visible items.
+     * Returns a map of item indices with its position and size.
+     *
+     * @param translateX The current translation along X axis.
+     * @param translateY The current translation along Y axis.
+     * @param size The size of the viewport.
+     * @return A map of visible item indices with its position and size.
+     */
+    fun getItems(translateX: Float, translateY: Float, size: Size): Map<Int, Rect> {
         val viewport = Rect(
             left = translateX,
             top = translateY,
-            right = translateX + constraints.maxWidth,
-            bottom = translateY + constraints.maxHeight,
+            right = translateX + size.width,
+            bottom = translateY + size.height,
         )
 
-        return cache
+        return items
             .filterValues { it.overlaps(viewport) }
             .mapValues { (_, info) ->
                 info.translate(translateX, translateY, viewport)
@@ -96,36 +117,36 @@ internal class MinaBoxItemProvider(
         }
 }
 
-// TODO: Optimise this
 private fun MinaBoxItem.overlaps(other: Rect): Boolean {
-    val size = Size(
-        width = if (width is Absolute) width.value else other.width,
-        height = if (height is Absolute) height.value else other.height,
-    )
-    val rect = Rect(offset, size)
-    return if (lockVertically && lockHorizontally) {
-        true
-    } else if (lockHorizontally) {
-        rect.copy(
-            left = Float.MIN_VALUE,
-            right = Float.MAX_VALUE,
-        ).overlaps(other)
+    if (lockVertically && lockHorizontally) {
+        return true
+    }
+
+    val width = width.resolve(other.width)
+    val height = height.resolve(other.height)
+    fun overlapsHorizontally(): Boolean = x + width > other.left && x < other.right
+    fun overlapsVertically(): Boolean = y + height > other.top && y < other.bottom
+
+    return if (lockHorizontally) {
+        overlapsVertically()
     } else if (lockVertically) {
-        rect.copy(
-            top = Float.MIN_VALUE,
-            bottom = Float.MAX_VALUE,
-        ).overlaps(other)
+        overlapsHorizontally()
     } else {
-        rect.overlaps(other)
+        overlapsHorizontally() && overlapsVertically()
     }
 }
 
-private fun MinaBoxItem.translate(x: Float, y: Float, viewport: Rect): Rect {
-    val translateX = x.takeUnless { lockHorizontally } ?: 0f
-    val translateY = y.takeUnless { lockVertically } ?: 0f
-    val size = Size(
-        width = if (width is Absolute) width.value else viewport.width,
-        height = if (height is Absolute) height.value else viewport.height,
+private fun MinaBoxItem.translate(translateX: Float, translateY: Float, viewport: Rect): Rect {
+    val itemTranslateX = translateX.takeUnless { lockHorizontally } ?: 0f
+    val itemTranslateY = translateY.takeUnless { lockVertically } ?: 0f
+    val newX = this.x - itemTranslateX
+    val newY = this.y - itemTranslateY
+    val width = width.resolve(viewport.width)
+    val height = height.resolve(viewport.height)
+    return Rect(
+        left = newX,
+        top = newY,
+        right = newX + width,
+        bottom = newY + height
     )
-    return Rect(offset.copy(x = offset.x - translateX, y = offset.y - translateY), size)
 }

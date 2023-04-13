@@ -1,3 +1,5 @@
+@file:Suppress("UndocumentedPublicProperty")
+
 package eu.wewox.programguide.demo.ui.theme
 
 import androidx.compose.ui.graphics.Color

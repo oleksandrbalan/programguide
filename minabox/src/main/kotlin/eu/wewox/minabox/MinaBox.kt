@@ -1,10 +1,6 @@
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package eu.wewox.minabox
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.layout.LazyLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,11 +14,19 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
+/**
+ * Lazy layout to display data on the two directional plane.
+ * Items should be provided with [content] lambda.
+ *
+ * @param modifier The modifier instance for the root composable.
+ * @param state The state which could be used to observe and change translation offset.
+ * @param content The lambda block which describes the content. Inside this block you can use
+ * [MinaBoxScope.items] method to add items.
+ */
 @Composable
-fun MinaBox(
+public fun MinaBox(
     modifier: Modifier = Modifier,
     state: MinaBoxState = rememberMinaBoxState(),
-    alignmentPadding: MinaBoxAlignmentPadding = MinaBoxAlignmentPadding(),
     content: MinaBoxScope.() -> Unit
 ) {
     val itemProvider = rememberItemProvider(content)
@@ -34,20 +38,21 @@ fun MinaBox(
         itemProvider = itemProvider,
     ) { constraints ->
         val size = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
-        val positionProvider = MinaBoxPositionProviderImpl(itemProvider, alignmentPadding, size)
-        val maxSize = itemProvider.itemsSize
+        val maxSize = itemProvider.size
         val bounds = Rect(
             left = 0f,
             top = 0f,
             right = (maxSize.width - size.width).coerceAtLeast(0f),
             bottom = (maxSize.height - size.height).coerceAtLeast(0f)
         )
-        state.updateBounds(positionProvider, bounds)
+
+        val position = MinaBoxPositionProviderImpl(itemProvider.items, layoutDirection, size)
+        state.updateBounds(position, bounds)
 
         val items = itemProvider.getItems(
             state.translateX.value,
             state.translateY.value,
-            constraints,
+            size,
         )
 
         val placeables = items.map { (index, bounds) ->
@@ -77,12 +82,6 @@ private fun Modifier.lazyLayoutPointerInput(state: MinaBoxState): Modifier =
     pointerInput(Unit) {
         val velocityTracker = VelocityTracker()
         coroutineScope {
-            launch {
-                detectTapGestures(
-                    onPress = { state.stopAnimation() }
-                )
-            }
-
             detectDragGestures(
                 onDragEnd = {
                     val velocity = velocityTracker.calculateVelocity()

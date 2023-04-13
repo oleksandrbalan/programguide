@@ -14,13 +14,26 @@ import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
+/**
+ * Creates a [MinaBoxState] that is remembered across compositions.
+ *
+ * @param initialOffset The lambda to provide initial offset on the plane.
+ * @return Instance of the [MinaBoxState].
+ */
 @Composable
-fun rememberMinaBoxState(initialOffset: MinaBoxPositionProvider.() -> Offset = { Offset.Zero }): MinaBoxState {
+public fun rememberMinaBoxState(
+    initialOffset: MinaBoxPositionProvider.() -> Offset = { Offset.Zero }
+): MinaBoxState {
     return remember { MinaBoxState(initialOffset) }
 }
 
+/**
+ * A state object that can be hoisted to control and observe scrolling.
+ *
+ * @property initialOffset The lambda to provide initial offset on the plane.
+ */
 @Stable
-class MinaBoxState(
+public class MinaBoxState(
     private val initialOffset: MinaBoxPositionProvider.() -> Offset
 ) {
     private lateinit var positionProvider: MinaBoxPositionProviderImpl
@@ -28,22 +41,34 @@ class MinaBoxState(
     private lateinit var _translateX: Animatable<Float, AnimationVector1D>
     private lateinit var _translateY: Animatable<Float, AnimationVector1D>
 
-    val translateX: State<Float> by lazy { _translateX.asState() }
-    val translateY: State<Float> by lazy { _translateY.asState() }
+    /**
+     * Offset on the X axis in pixels.
+     */
+    public val translateX: State<Float> by lazy { _translateX.asState() }
 
+    /**
+     * Offset on the Y axis in pixels.
+     */
+    public val translateY: State<Float> by lazy { _translateY.asState() }
+
+    /**
+     * Updates bounds of the layout and initializes the position provider.
+     *
+     * @param positionProvider An instance of the position provider.
+     * @param maxBounds The max size of the layout.
+     */
     internal fun updateBounds(
         positionProvider: MinaBoxPositionProviderImpl,
         maxBounds: Rect,
     ) {
-        if (::positionProvider.isInitialized) {
-            return
+        if (!::positionProvider.isInitialized) {
+            this.positionProvider = positionProvider
+
+            val (x, y) = positionProvider.initialOffset()
+
+            _translateX = Animatable(x)
+            _translateY = Animatable(y)
         }
-        this.positionProvider = positionProvider
-
-        val (x, y) = positionProvider.initialOffset()
-
-        _translateX = Animatable(x)
-        _translateY = Animatable(y)
 
         _translateX.updateBounds(
             lowerBound = maxBounds.left,
@@ -55,7 +80,12 @@ class MinaBoxState(
         )
     }
 
-    suspend fun dragBy(value: Offset) {
+    /**
+     * Translates the current offset by the given value.
+     *
+     * @param value The value to translate by.
+     */
+    public suspend fun dragBy(value: Offset) {
         coroutineScope {
             launch {
                 _translateX.snapTo(_translateX.value - value.x)
@@ -66,7 +96,13 @@ class MinaBoxState(
         }
     }
 
-    suspend fun animateTo(x: Float = _translateX.value, y: Float = _translateY.value) {
+    /**
+     * Animates current offset to the new value.
+     *
+     * @param x The new offset on the X axis.
+     * @param y The new offset on the Y axis.
+     */
+    public suspend fun animateTo(x: Float = _translateX.value, y: Float = _translateY.value) {
         coroutineScope {
             launch {
                 _translateX.animateTo(x)
@@ -77,7 +113,13 @@ class MinaBoxState(
         }
     }
 
-    suspend fun snapTo(x: Float = _translateX.value, y: Float = _translateY.value) {
+    /**
+     * Snaps current offset to the new value.
+     *
+     * @param x The new offset on the X axis.
+     * @param y The new offset on the Y axis.
+     */
+    public suspend fun snapTo(x: Float = _translateX.value, y: Float = _translateY.value) {
         coroutineScope {
             launch {
                 _translateX.snapTo(x)
@@ -88,27 +130,12 @@ class MinaBoxState(
         }
     }
 
-    suspend fun animateTo(index: Int, alignment: Alignment = Alignment.Center) {
-        val offset = positionProvider.getOffset(
-            index = index,
-            alignment = alignment,
-            currentX = translateX.value,
-            currentY = translateY.value
-        )
-        animateTo(offset.x, offset.y)
-    }
-
-    suspend fun snapTo(index: Int, alignment: Alignment = Alignment.Center) {
-        val offset = positionProvider.getOffset(
-            index = index,
-            alignment = alignment,
-            currentX = translateX.value,
-            currentY = translateY.value
-        )
-        snapTo(offset.x, offset.y)
-    }
-
-    suspend fun flingBy(velocity: Velocity) {
+    /**
+     * Flings current offset by the given velocity.
+     *
+     * @param velocity The velocity to fling by.
+     */
+    public suspend fun flingBy(velocity: Velocity) {
         coroutineScope {
             launch {
                 _translateX.animateDecay(-velocity.x, exponentialDecay())
@@ -119,7 +146,10 @@ class MinaBoxState(
         }
     }
 
-    suspend fun stopAnimation() {
+    /**
+     * Stops current offset animations.
+     */
+    public suspend fun stopAnimation() {
         coroutineScope {
             launch {
                 _translateX.stop()
@@ -128,5 +158,67 @@ class MinaBoxState(
                 _translateY.stop()
             }
         }
+    }
+
+    /**
+     * Animates current offset to the item with a given index.
+     *
+     * @param index The global index of the item.
+     * @param alignment The alignment to align item inside the [MinaBox].
+     * @param paddingStart An additional start padding to tweak alignment.
+     * @param paddingTop An additional top padding to tweak alignment.
+     * @param paddingEnd An additional end padding to tweak alignment.
+     * @param paddingBottom An additional bottom padding to tweak alignment.
+     */
+    public suspend fun animateTo(
+        index: Int,
+        alignment: Alignment = Alignment.Center,
+        paddingStart: Float = 0f,
+        paddingTop: Float = 0f,
+        paddingEnd: Float = 0f,
+        paddingBottom: Float = 0f,
+    ) {
+        val offset = positionProvider.getOffset(
+            index = index,
+            alignment = alignment,
+            paddingStart = paddingStart,
+            paddingTop = paddingTop,
+            paddingEnd = paddingEnd,
+            paddingBottom = paddingBottom,
+            currentX = translateX.value,
+            currentY = translateY.value
+        )
+        animateTo(offset.x, offset.y)
+    }
+
+    /**
+     * Snaps current offset to the item with a given index.
+     *
+     * @param index The global index of the item.
+     * @param alignment The alignment to align item inside the [MinaBox].
+     * @param paddingStart An additional start padding to tweak alignment.
+     * @param paddingTop An additional top padding to tweak alignment.
+     * @param paddingEnd An additional end padding to tweak alignment.
+     * @param paddingBottom An additional bottom padding to tweak alignment.
+     */
+    public suspend fun snapTo(
+        index: Int,
+        alignment: Alignment = Alignment.Center,
+        paddingStart: Float = 0f,
+        paddingTop: Float = 0f,
+        paddingEnd: Float = 0f,
+        paddingBottom: Float = 0f,
+    ) {
+        val offset = positionProvider.getOffset(
+            index = index,
+            alignment = alignment,
+            paddingStart = paddingStart,
+            paddingTop = paddingTop,
+            paddingEnd = paddingEnd,
+            paddingBottom = paddingBottom,
+            currentX = translateX.value,
+            currentY = translateY.value
+        )
+        snapTo(offset.x, offset.y)
     }
 }

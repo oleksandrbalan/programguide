@@ -1,3 +1,5 @@
+@file:Suppress("all")
+
 package eu.wewox.programguide
 
 import androidx.compose.ui.unit.Density
@@ -10,14 +12,15 @@ data class ProgramGuideDimensions(
     val channelHeight: Dp,
 )
 
-context(Density)
-internal fun ProgramGuideDimensions.roundToPx(): ProgramGuidePxDimensions =
-    ProgramGuidePxDimensions(
-        timelineHourWidth = timelineHourWidth.roundToPx(),
-        timelineHeight = timelineHeight.roundToPx(),
-        channelWidth = channelWidth.roundToPx(),
-        channelHeight = channelHeight.roundToPx(),
-    )
+internal fun ProgramGuideDimensions.roundToPx(density: Density): ProgramGuidePxDimensions =
+    with(density) {
+        ProgramGuidePxDimensions(
+            timelineHourWidth = timelineHourWidth.roundToPx(),
+            timelineHeight = timelineHeight.roundToPx(),
+            channelWidth = channelWidth.roundToPx(),
+            channelHeight = channelHeight.roundToPx(),
+        )
+    }
 
 internal data class ProgramGuidePxDimensions(
     val timelineHourWidth: Int,

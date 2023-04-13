@@ -1,3 +1,5 @@
+@file:Suppress("all")
+
 package eu.wewox.programguide
 
 import androidx.compose.runtime.Composable
