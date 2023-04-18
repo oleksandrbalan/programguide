@@ -3,6 +3,11 @@ package eu.wewox.minabox
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.lazy.layout.LazyLayout
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Rect
@@ -10,6 +15,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.LayoutDirection
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.min
@@ -29,7 +36,10 @@ public fun MinaBox(
     state: MinaBoxState = rememberMinaBoxState(),
     content: MinaBoxScope.() -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val itemProvider = rememberItemProvider(content)
+
+    var positionProvider by remember { mutableStateOf<MinaBoxPositionProviderImpl?>(null) }
 
     LazyLayout(
         modifier = modifier
@@ -38,16 +48,9 @@ public fun MinaBox(
         itemProvider = itemProvider,
     ) { constraints ->
         val size = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
-        val maxSize = itemProvider.size
-        val bounds = Rect(
-            left = 0f,
-            top = 0f,
-            right = (maxSize.width - size.width).coerceAtLeast(0f),
-            bottom = (maxSize.height - size.height).coerceAtLeast(0f)
-        )
 
-        val position = MinaBoxPositionProviderImpl(itemProvider.items, layoutDirection, size)
-        state.updateBounds(position, bounds)
+        positionProvider =
+            positionProvider.update(state, itemProvider, layoutDirection, size, scope)
 
         val items = itemProvider.getItems(
             state.translateX.value,
@@ -62,8 +65,8 @@ public fun MinaBox(
             ) to bounds.topLeft
         }
 
-        val width = min(maxSize.width.toInt(), constraints.maxWidth)
-        val height = min(maxSize.height.toInt(), constraints.maxHeight)
+        val width = min(itemProvider.size.width.toInt(), constraints.maxWidth)
+        val height = min(itemProvider.size.height.toInt(), constraints.maxHeight)
 
         layout(width, height) {
             placeables.forEach { (itemPlaceables, position) ->
@@ -77,6 +80,33 @@ public fun MinaBox(
         }
     }
 }
+
+private fun MinaBoxPositionProviderImpl?.update(
+    state: MinaBoxState,
+    itemProvider: MinaBoxItemProvider,
+    layoutDirection: LayoutDirection,
+    size: Size,
+    scope: CoroutineScope,
+): MinaBoxPositionProviderImpl =
+    if (
+        this != null &&
+        this.items == itemProvider.items &&
+        this.layoutDirection == layoutDirection &&
+        this.size == size
+    ) {
+        this
+    } else {
+        MinaBoxPositionProviderImpl(itemProvider.items, layoutDirection, size).also {
+            val maxSize = itemProvider.size
+            val bounds = Rect(
+                left = 0f,
+                top = 0f,
+                right = (maxSize.width - size.width).coerceAtLeast(0f),
+                bottom = (maxSize.height - size.height).coerceAtLeast(0f)
+            )
+            state.updateBounds(it, bounds, scope)
+        }
+    }
 
 private fun Modifier.lazyLayoutPointerInput(state: MinaBoxState): Modifier =
     pointerInput(Unit) {

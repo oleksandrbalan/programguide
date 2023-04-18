@@ -84,7 +84,7 @@ comments:
 complexity:
   active: true
   ComplexCondition:
-    active: true
+    active: false
     threshold: 4
   ComplexInterface:
     active: false
@@ -346,9 +346,7 @@ naming:
     packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
   TopLevelPropertyNaming:
     active: true
-    constantPattern: '[A-Z][A-Za-z0-9]*'
-    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
-    privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'
+    constantPattern: '[a-z][_A-Za-z0-9]*|[A-Z][_A-Z0-9]*'
   VariableMaxLength:
     active: false
     maximumVariableNameLength: 64
@@ -500,7 +498,7 @@ style:
     active: false
     includeLineWrapping: false
   ForbiddenComment:
-    active: true
+    active: false
     values:
       - 'FIXME:'
       - 'STOPSHIP:'

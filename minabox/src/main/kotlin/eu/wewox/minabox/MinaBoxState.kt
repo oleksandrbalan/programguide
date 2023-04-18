@@ -5,13 +5,19 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.Velocity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -36,20 +42,20 @@ public fun rememberMinaBoxState(
 public class MinaBoxState(
     private val initialOffset: MinaBoxPositionProvider.() -> Offset
 ) {
-    private lateinit var positionProvider: MinaBoxPositionProviderImpl
 
-    private lateinit var _translateX: Animatable<Float, AnimationVector1D>
-    private lateinit var _translateY: Animatable<Float, AnimationVector1D>
-
-    /**
-     * Offset on the X axis in pixels.
-     */
-    public val translateX: State<Float> by lazy { _translateX.asState() }
+    internal lateinit var translateX: Animatable<Float, AnimationVector1D>
+    internal lateinit var translateY: Animatable<Float, AnimationVector1D>
 
     /**
-     * Offset on the Y axis in pixels.
+     * The position provider used to get items offsets.
      */
-    public val translateY: State<Float> by lazy { _translateY.asState() }
+    public lateinit var positionProvider: MinaBoxPositionProvider
+
+    /**
+     * Offset on the plane, if null state is not initialised.
+     */
+    public var translate: Translate? by mutableStateOf(null)
+        private set
 
     /**
      * Updates bounds of the layout and initializes the position provider.
@@ -58,26 +64,54 @@ public class MinaBoxState(
      * @param maxBounds The max size of the layout.
      */
     internal fun updateBounds(
-        positionProvider: MinaBoxPositionProviderImpl,
+        positionProvider: MinaBoxPositionProvider,
         maxBounds: Rect,
+        coroutineScope: CoroutineScope,
     ) {
-        if (!::positionProvider.isInitialized) {
-            this.positionProvider = positionProvider
+        this.positionProvider = positionProvider
 
+        if (!::translateX.isInitialized && !::translateY.isInitialized) {
             val (x, y) = positionProvider.initialOffset()
 
-            _translateX = Animatable(x)
-            _translateY = Animatable(y)
+            translateX = Animatable(x)
+            translateY = Animatable(y)
+
+            snapshotFlow { translateX.value }
+                .onEach { updateTranslate() }
+                .launchIn(coroutineScope)
+
+            snapshotFlow { translateY.value }
+                .onEach { updateTranslate() }
+                .launchIn(coroutineScope)
         }
 
-        _translateX.updateBounds(
+        translateX.updateBounds(
             lowerBound = maxBounds.left,
             upperBound = maxBounds.right,
         )
-        _translateY.updateBounds(
+        translateY.updateBounds(
             lowerBound = maxBounds.top,
             upperBound = maxBounds.bottom,
         )
+
+        updateTranslate()
+    }
+
+    private fun updateTranslate() {
+        if (
+            translate == null ||
+            translateX.value != translate?.x ||
+            translateY.value != translate?.y ||
+            translateX.upperBound != translate?.maxX ||
+            translateY.upperBound != translate?.maxY
+        ) {
+            translate = Translate(
+                translateX.value,
+                translateY.value,
+                translateX.upperBound ?: 0f,
+                translateY.upperBound ?: 0f
+            )
+        }
     }
 
     /**
@@ -88,10 +122,10 @@ public class MinaBoxState(
     public suspend fun dragBy(value: Offset) {
         coroutineScope {
             launch {
-                _translateX.snapTo(_translateX.value - value.x)
+                translateX.snapTo(translateX.value - value.x)
             }
             launch {
-                _translateY.snapTo(_translateY.value - value.y)
+                translateY.snapTo(translateY.value - value.y)
             }
         }
     }
@@ -102,13 +136,13 @@ public class MinaBoxState(
      * @param x The new offset on the X axis.
      * @param y The new offset on the Y axis.
      */
-    public suspend fun animateTo(x: Float = _translateX.value, y: Float = _translateY.value) {
+    public suspend fun animateTo(x: Float = translateX.value, y: Float = translateY.value) {
         coroutineScope {
             launch {
-                _translateX.animateTo(x)
+                translateX.animateTo(x)
             }
             launch {
-                _translateY.animateTo(y)
+                translateY.animateTo(y)
             }
         }
     }
@@ -119,13 +153,13 @@ public class MinaBoxState(
      * @param x The new offset on the X axis.
      * @param y The new offset on the Y axis.
      */
-    public suspend fun snapTo(x: Float = _translateX.value, y: Float = _translateY.value) {
+    public suspend fun snapTo(x: Float = translateX.value, y: Float = translateY.value) {
         coroutineScope {
             launch {
-                _translateX.snapTo(x)
+                translateX.snapTo(x)
             }
             launch {
-                _translateY.snapTo(y)
+                translateY.snapTo(y)
             }
         }
     }
@@ -138,10 +172,10 @@ public class MinaBoxState(
     public suspend fun flingBy(velocity: Velocity) {
         coroutineScope {
             launch {
-                _translateX.animateDecay(-velocity.x, exponentialDecay())
+                translateX.animateDecay(-velocity.x, exponentialDecay())
             }
             launch {
-                _translateY.animateDecay(-velocity.y, exponentialDecay())
+                translateY.animateDecay(-velocity.y, exponentialDecay())
             }
         }
     }
@@ -152,10 +186,10 @@ public class MinaBoxState(
     public suspend fun stopAnimation() {
         coroutineScope {
             launch {
-                _translateX.stop()
+                translateX.stop()
             }
             launch {
-                _translateY.stop()
+                translateY.stop()
             }
         }
     }
@@ -186,7 +220,7 @@ public class MinaBoxState(
             paddingEnd = paddingEnd,
             paddingBottom = paddingBottom,
             currentX = translateX.value,
-            currentY = translateY.value
+            currentY = translateY.value,
         )
         animateTo(offset.x, offset.y)
     }
@@ -221,4 +255,19 @@ public class MinaBoxState(
         )
         snapTo(offset.x, offset.y)
     }
+
+    /**
+     * Represents the offset on the plane.
+     *
+     * @property x Offset on the X axis in pixels.
+     * @property y Offset on the Y axis in pixels.
+     * @property maxX The max offset on on the X axis in pixels.
+     * @property maxY The max offset on on the Y axis in pixels.
+     */
+    public class Translate(
+        public val x: Float,
+        public val y: Float,
+        public val maxX: Float,
+        public val maxY: Float,
+    )
 }

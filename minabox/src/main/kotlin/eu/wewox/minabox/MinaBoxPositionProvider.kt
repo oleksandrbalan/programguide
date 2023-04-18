@@ -20,6 +20,8 @@ public interface MinaBoxPositionProvider {
      * @param paddingTop An additional top padding to tweak alignment.
      * @param paddingEnd An additional end padding to tweak alignment.
      * @param paddingBottom An additional bottom padding to tweak alignment.
+     * @param currentX The current offset on the X axis.
+     * @param currentY The current offset on the Y axis.
      * @return An item offset.
      */
     public fun getOffset(
@@ -29,6 +31,8 @@ public interface MinaBoxPositionProvider {
         paddingTop: Float = 0f,
         paddingEnd: Float = 0f,
         paddingBottom: Float = 0f,
+        currentX: Float = 0f,
+        currentY: Float = 0f,
     ): Offset
 }
 
@@ -40,44 +44,12 @@ public interface MinaBoxPositionProvider {
  * @property size The size of the viewport.
  */
 internal class MinaBoxPositionProviderImpl(
-    private val items: Map<Int, MinaBoxItem>,
-    private val layoutDirection: LayoutDirection,
-    private val size: Size,
+    internal val items: Map<Int, MinaBoxItem>,
+    internal val layoutDirection: LayoutDirection,
+    internal val size: Size,
 ) : MinaBoxPositionProvider {
 
     override fun getOffset(
-        index: Int,
-        alignment: Alignment,
-        paddingStart: Float,
-        paddingTop: Float,
-        paddingEnd: Float,
-        paddingBottom: Float,
-    ): Offset =
-        getOffset(
-            index = index,
-            alignment = alignment,
-            paddingStart = paddingStart,
-            paddingTop = paddingTop,
-            paddingEnd = paddingEnd,
-            paddingBottom = paddingBottom,
-            currentX = 0f,
-            currentY = 0f
-        )
-
-    /**
-     * Returns offset of the item with global [index].
-     *
-     * @param index The global index of the item.
-     * @param alignment The alignment to align item inside the [MinaBox].
-     * @param paddingStart An additional start padding to tweak alignment.
-     * @param paddingTop An additional top padding to tweak alignment.
-     * @param paddingEnd An additional end padding to tweak alignment.
-     * @param paddingBottom An additional bottom padding to tweak alignment.
-     * @param currentX The current offset on the X axis.
-     * @param currentY The current offset on the Y axis.
-     * @return An item offset.
-     */
-    fun getOffset(
         index: Int,
         alignment: Alignment,
         paddingStart: Float,

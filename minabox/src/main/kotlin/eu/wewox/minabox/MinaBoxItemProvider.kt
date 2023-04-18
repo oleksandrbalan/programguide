@@ -4,7 +4,7 @@ import androidx.compose.foundation.lazy.layout.IntervalList
 import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.foundation.lazy.layout.getDefaultLazyLayoutKey
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import kotlin.math.max
@@ -19,7 +19,7 @@ import kotlin.math.max
 internal fun rememberItemProvider(
     content: MinaBoxScope.() -> Unit
 ): MinaBoxItemProvider =
-    remember(content) {
+    run {
         val scope = MinaBoxScopeImpl().apply(content)
         MinaBoxItemProvider(scope.intervals)
     }
