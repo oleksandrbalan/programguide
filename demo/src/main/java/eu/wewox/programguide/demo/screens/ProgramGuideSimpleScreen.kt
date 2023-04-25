@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import eu.wewox.programguide.ProgramGuide
 import eu.wewox.programguide.ProgramGuideItem
@@ -21,13 +22,13 @@ import eu.wewox.programguide.demo.ui.components.TopBar
  * Showcases the most simple usage of program guide.
  */
 @Composable
-fun SimpleProgramGuideScreen() {
+fun ProgramGuideScreenSimple() {
     Scaffold(
-        topBar = { TopBar(Example.SimpleProgramGuide.label) }
+        topBar = { TopBar(Example.ProgramGuideSimple.label) }
     ) { padding ->
         val channels = 20
         val timeline = 8..22
-        val programs = createPrograms(channels, timeline)
+        val programs = remember { createPrograms(channels, timeline) }
 
         ProgramGuide(
             modifier = Modifier

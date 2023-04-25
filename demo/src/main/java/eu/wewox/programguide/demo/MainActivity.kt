@@ -29,8 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import eu.wewox.programguide.demo.screens.ConfigurableProgramGuideScreen
-import eu.wewox.programguide.demo.screens.SimpleProgramGuideScreen
+import eu.wewox.programguide.demo.screens.ProgramGuideConfigurationScreen
+import eu.wewox.programguide.demo.screens.ProgramGuideScreenSimple
+import eu.wewox.programguide.demo.screens.ProgramGuideSizeScreen
+import eu.wewox.programguide.demo.screens.ProgramGuideStateScreen
 import eu.wewox.programguide.demo.ui.components.TopBar
 import eu.wewox.programguide.demo.ui.theme.ProgramGuideDemoTheme
 import eu.wewox.programguide.demo.ui.theme.SpacingMedium
@@ -56,8 +58,10 @@ class MainActivity : ComponentActivity() {
                 Crossfade(targetState = example) { selected ->
                     when (selected) {
                         null -> RootScreen(onExampleClick = { example = it })
-                        Example.SimpleProgramGuide -> SimpleProgramGuideScreen()
-                        Example.ConfigurableProgramGuide -> ConfigurableProgramGuideScreen()
+                        Example.ProgramGuideSimple -> ProgramGuideScreenSimple()
+                        Example.ProgramGuideConfiguration -> ProgramGuideConfigurationScreen()
+                        Example.ProgramGuideState -> ProgramGuideStateScreen()
+                        Example.ProgramGuideSize -> ProgramGuideSizeScreen()
                     }
                 }
             }

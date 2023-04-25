@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package eu.wewox.programguide.demo.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,12 +23,15 @@ import eu.wewox.programguide.demo.data.formatTime
  *
  * @param program The program data.
  * @param modifier The modifier instance for the root composable.
+ * @param onClick Callback to be called when the surface is clicked.
  */
 @Composable
-fun ProgramCell(program: Program, modifier: Modifier = Modifier) {
+fun ProgramCell(program: Program, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Surface(
         color = MaterialTheme.colorScheme.primary,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.surface),
+        onClick = onClick ?: {},
+        enabled = onClick != null,
         modifier = modifier,
     ) {
         Column(modifier = Modifier.padding(4.dp)) {
@@ -49,12 +55,15 @@ fun ProgramCell(program: Program, modifier: Modifier = Modifier) {
  *
  * @param index The channel index.
  * @param modifier The modifier instance for the root composable.
+ * @param onClick Callback to be called when the surface is clicked.
  */
 @Composable
-fun ChannelCell(index: Int, modifier: Modifier = Modifier) {
+fun ChannelCell(index: Int, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Surface(
         color = MaterialTheme.colorScheme.tertiary,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.surface),
+        onClick = onClick ?: {},
+        enabled = onClick != null,
         modifier = modifier,
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -72,12 +81,15 @@ fun ChannelCell(index: Int, modifier: Modifier = Modifier) {
  *
  * @param hour The timeline item hour.
  * @param modifier The modifier instance for the root composable.
+ * @param onClick Callback to be called when the surface is clicked.
  */
 @Composable
-fun TimelineItemCell(hour: Float, modifier: Modifier = Modifier) {
+fun TimelineItemCell(hour: Float, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Surface(
         color = MaterialTheme.colorScheme.tertiary,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.surface),
+        onClick = onClick ?: {},
+        enabled = onClick != null,
         modifier = modifier,
     ) {
         Box(contentAlignment = Alignment.CenterStart) {
