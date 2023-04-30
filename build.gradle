@@ -4,18 +4,17 @@ buildscript {
 		min_sdk_version = 21
 		target_sdk_version = 33
 
-		compose_bom_version = "2023.04.00"
+		compose_bom_version = "2023.04.01"
 		compose_compiler_version = "1.4.2"
-		accompanist_version = "0.30.0"
-		lifecycle_version = "2.6.0"
-		activity_version = "1.6.1"
+		accompanist_version = "0.30.1"
+		activity_version = "1.7.1"
 	}
 }
 
 plugins {
-	id 'com.android.application' version '7.4.2' apply false
-	id 'com.android.library' version '7.4.2' apply false
-	id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
+	id "com.android.application" version "8.0.0" apply false
+	id "com.android.library" version "8.0.0" apply false
+	id "org.jetbrains.kotlin.android" version "1.8.10" apply false
 	id "io.gitlab.arturbosch.detekt" version "1.21.0"
 	id "com.diffplug.spotless" version "6.5.1"
 	id "com.vanniktech.maven.publish" version "0.21.0"

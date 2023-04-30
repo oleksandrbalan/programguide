@@ -13,6 +13,6 @@ dependencyResolutionManagement {
 	}
 }
 rootProject.name = "ProgramGuide"
-include ':demo'
-include ':minabox'
-include ':programguide'
+include ":demo"
+include ":minabox"
+include ":programguide"
