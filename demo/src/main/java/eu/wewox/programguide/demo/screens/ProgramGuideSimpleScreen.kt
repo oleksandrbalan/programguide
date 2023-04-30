@@ -22,7 +22,7 @@ import eu.wewox.programguide.demo.ui.components.TopBar
  * Showcases the most simple usage of program guide.
  */
 @Composable
-fun ProgramGuideScreenSimple() {
+fun ProgramGuideSimpleScreen() {
     Scaffold(
         topBar = { TopBar(Example.ProgramGuideSimple.label) }
     ) { padding ->
