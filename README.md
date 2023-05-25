@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.oleksandrbalan/programguide.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.oleksandrbalan/programguide)
 
-<img align="right" width="128" src="https://github.com/oleksandrbalan/programguide/assets/20944869/e0f54064-b157-4f3d-a7c6-3901bee9479d">
+<img align="right" width="128" src="https://github.com/oleksandrbalan/programguide/assets/20944869/40f7d757-ff5f-4b9a-a4d4-5666a46d09f9">
 
 # Program Guide
 
@@ -95,10 +95,10 @@ See Demo application and [examples](demo/src/main/kotlin/eu/wewox/programguide/s
 
 Simple EPG data.
 
-https://github.com/oleksandrbalan/programguide/assets/20944869/c7648849-8277-4199-b818-ef697a4b53f5
+https://github.com/oleksandrbalan/programguide/assets/20944869/20fefbce-80cc-4e43-87d9-e359edf64c35
 
 Fully configurable layout.
 
-https://github.com/oleksandrbalan/programguide/assets/20944869/fa886c08-5a9f-402b-a792-d12655c49ab8
+https://github.com/oleksandrbalan/programguide/assets/20944869/9ce2ecc6-7b80-470b-9254-77dcd5e670c1
 
 If you need further customization options, check [MinaBox](https://github.com/oleksandrbalan/minabox) library.
