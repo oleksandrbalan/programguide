@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.oleksandrbalan/programguide.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.oleksandrbalan/programguide)
 
-<img align="right" width="128" src="https://github.com/oleksandrbalan/programguide/assets/20944869/829052fd-4fa8-4599-8980-9dcd7189e1c5">
+<img align="right" width="128" src="https://github.com/oleksandrbalan/programguide/assets/20944869/e0f54064-b157-4f3d-a7c6-3901bee9479d">
 
 # Program Guide
 
@@ -52,7 +52,7 @@ There are multiple types of items to register:
 * Current time - vertical line of the current time.
 * Top corner - place for content in the top left corner, above channels and timeline.
 
-Note: To be independent on date-time libraries, hours are defined as float numbers. For example: 9.5f represents 09:30 and 16.25f represents 16:15.
+**Note:** To be independent on date-time libraries, hours are defined as float numbers. For example: 9.5f represents 09:30 and 16.25f represents 16:15.
 
 The size of the items are defined via `dimensions` parameter.
 
@@ -93,6 +93,12 @@ See Demo application and [examples](demo/src/main/kotlin/eu/wewox/programguide/s
 
 ## Examples
 
+Simple EPG data.
 
+https://github.com/oleksandrbalan/programguide/assets/20944869/c7648849-8277-4199-b818-ef697a4b53f5
+
+Fully configurable layout.
+
+https://github.com/oleksandrbalan/programguide/assets/20944869/fa886c08-5a9f-402b-a792-d12655c49ab8
 
 If you need further customization options, check [MinaBox](https://github.com/oleksandrbalan/minabox) library.
