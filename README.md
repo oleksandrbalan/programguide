@@ -58,7 +58,7 @@ The size of the items are defined via `dimensions` parameter.
 
 It is also possible to observe on the scroll state and change it programmatically using an instance of the `ProgramGuideState`.
 
-```
+```kotlin
 ProgramGuide {
     programs(
         // Count of programs
