@@ -1,5 +1,6 @@
 package eu.wewox.programguide
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -15,6 +16,8 @@ import eu.wewox.minabox.MinaBoxScope
  * @param modifier The modifier instance for the root composable.
  * @param state The state which could be used to observe and change translation offset.
  * @param dimensions The dimensions of the program guide.
+ * @param contentPadding A padding around the whole content. This will add padding for the content
+ * after it has been clipped, which is not possible via modifier param.
  * @param content The lambda block which describes the content. Inside this block you can use
  * [ProgramGuideScope.programs] / [ProgramGuideScope.channels] methods to add items.
  */
@@ -23,6 +26,7 @@ public fun ProgramGuide(
     modifier: Modifier = Modifier,
     state: ProgramGuideState = rememberProgramGuideState(),
     dimensions: ProgramGuideDimensions = ProgramGuideDefaults.dimensions,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     content: ProgramGuideScope.() -> Unit
 ) {
     val dimensionsPx = dimensions.roundToPx(LocalDensity.current)
@@ -37,6 +41,7 @@ public fun ProgramGuide(
 
     MinaBox(
         state = state.minaBoxState,
+        contentPadding = contentPadding,
         modifier = modifier
     ) {
         items(
