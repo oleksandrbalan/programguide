@@ -1,61 +1,56 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+
 plugins {
-	alias(libs.plugins.android.application)
-	alias(libs.plugins.kotlin)
+	alias(libs.plugins.kotlin.multiplatform)
+	alias(libs.plugins.jetbrains.cocoapods)
+	alias(libs.plugins.jetbrains.compose)
+	alias(libs.plugins.android.library)
+	id("convention.jvm.toolchain")
+}
+
+kotlin {
+	@OptIn(ExperimentalKotlinGradlePluginApi::class)
+	targetHierarchy.default()
+
+	androidTarget()
+
+	jvm()
+
+	iosX64()
+	iosArm64()
+	iosSimulatorArm64()
+
+	cocoapods {
+		version = "1.0.0"
+		summary = "Demo Compose Multiplatform module"
+		homepage = "---"
+		ios.deploymentTarget = "14.1"
+		podfile = project.file("../iosdemo/Podfile")
+		framework {
+			baseName = "demo"
+			isStatic = true
+		}
+		extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
+	}
+
+	sourceSets {
+		val commonMain by getting {
+			dependencies {
+				implementation(project(":programguide"))
+
+				implementation(compose.material3)
+			}
+		}
+
+		all {
+			languageSettings.optIn("androidx.compose.ui.text.ExperimentalTextApi")
+			languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
+		}
+	}
 }
 
 android {
-	namespace = "eu.wewox.programguide"
+	namespace = "eu.wewox.programguide.demo"
 
 	compileSdk = libs.versions.sdk.compile.get().toInt()
-
-	defaultConfig {
-		applicationId = "eu.wewox.programguide"
-
-		minSdk = libs.versions.sdk.min.get().toInt()
-		targetSdk = libs.versions.sdk.target.get().toInt()
-
-		versionCode = 1
-		versionName = "1.0"
-
-		vectorDrawables {
-			useSupportLibrary = true
-		}
-	}
-
-	buildTypes {
-		release {
-			isMinifyEnabled = false
-			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-		}
-	}
-	compileOptions {
-		sourceCompatibility = JavaVersion.toVersion(libs.versions.java.sourceCompatibility.get())
-		targetCompatibility = JavaVersion.toVersion(libs.versions.java.targetCompatibility.get())
-	}
-	kotlinOptions {
-		jvmTarget = libs.versions.java.jvmTarget.get()
-	}
-	buildFeatures {
-		compose = true
-	}
-	composeOptions {
-		kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-	}
-	packaging {
-		resources {
-			excludes += "/META-INF/{AL2.0,LGPL2.1}"
-		}
-	}
-}
-
-dependencies {
-	implementation(project(":programguide"))
-
-	implementation(platform(libs.compose.bom))
-	implementation(libs.compose.material3)
-	implementation(libs.compose.ui)
-	implementation(libs.compose.uitooling)
-	implementation(libs.compose.uitoolingpreview)
-	implementation(libs.androidx.activitycompose)
-	implementation(libs.accompanist.systemuicontroller)
 }
