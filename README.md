@@ -4,9 +4,13 @@
 
 # Program Guide
 
-Program Guide, aka EPG, library for Jetpack Compose.
+Program Guide, aka EPG, library for Compose UI.
 
 Lazy layout to display program guide data on the two directional plane. It is build on the [MinaBox](https://github.com/oleksandrbalan/minabox) (which is build on `LazyLayout`) and provides methods to register item(s) and handles scrolling on the plane.
+
+## Multiplatform
+
+Library supports [Android](https://developer.android.com/jetpack/compose), [iOS](https://github.com/JetBrains/compose-multiplatform-ios-android-template/#readme) and [Desktop](https://github.com/JetBrains/compose-multiplatform-desktop-template/#readme) (Windows, MacOS, Linux) targets.
 
 ## Usage
 
@@ -89,7 +93,7 @@ ProgramGuide {
 }
 ```
 
-See Demo application and [examples](demo/src/main/kotlin/eu/wewox/programguide/screens) for more usage examples.
+See Demo application and [examples](demo/src/commonMain/kotlin/eu/wewox/programguide/demo/screens) for more usage examples.
 
 ## Examples
 
