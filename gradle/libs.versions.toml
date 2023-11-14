@@ -9,6 +9,7 @@ minabox = "1.6.0"
 compose-bom = "2023.10.01"
 compose-compiler = "1.5.4"
 activity-compose = "1.8.0"
+core-splashscreen = "1.0.1"
 
 plugin-compose-jetbrains = "1.5.10"
 plugin-android-gradle = "8.1.3"
@@ -27,6 +28,7 @@ compose-ui = { module = "androidx.compose.ui:ui" }
 compose-uitooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-uitoolingpreview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-activitycompose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
+androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "plugin-android-gradle" }
