@@ -2,7 +2,7 @@
   <artifact type="jar" name="programguide-jvm">
     <output-path>$PROJECT_DIR$/programguide/build/libs</output-path>
     <root id="archive" name="programguide-jvm.jar">
-      <element id="module-output" name="ProgramGuide.programguide.jvmMain" />
+      <element id="module-output" name="programguide.ProgramGuide.programguide.jvmMain" />
     </root>
   </artifact>
 </component>
