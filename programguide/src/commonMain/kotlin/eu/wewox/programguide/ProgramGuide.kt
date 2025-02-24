@@ -24,7 +24,7 @@ import eu.wewox.minabox.MinaBoxScope
 @Composable
 public fun ProgramGuide(
     modifier: Modifier = Modifier,
-    state: ProgramGuideState = rememberProgramGuideState(),
+    state: ProgramGuideState = rememberSaveableProgramGuideState(),
     dimensions: ProgramGuideDimensions = ProgramGuideDefaults.dimensions,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     content: ProgramGuideScope.() -> Unit

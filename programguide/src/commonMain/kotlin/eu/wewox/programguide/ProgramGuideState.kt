@@ -3,6 +3,9 @@ package eu.wewox.programguide
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import eu.wewox.minabox.MinaBoxState
@@ -13,11 +16,34 @@ import eu.wewox.minabox.MinaBoxState
  * @param initialOffset The lambda to provide initial offset on the plane.
  * @return Instance of the [ProgramGuideState].
  */
+@Deprecated(
+    message = "Use rememberSaveableProgramGuideState() which uses rememberSaveable API.",
+    replaceWith = ReplaceWith(
+        "rememberSaveableProgramGuideState(initialOffset)",
+        "eu.wewox.programguide.rememberSaveableProgramGuideState"
+    )
+)
 @Composable
 public fun rememberProgramGuideState(
     initialOffset: ProgramGuidePositionProvider.() -> Offset = { Offset.Zero }
 ): ProgramGuideState {
     return remember { ProgramGuideState(initialOffset) }
+}
+
+/**
+ * Creates a [ProgramGuideState] that is remembered across compositions and saved across activity or process recreation.
+ *
+ * @param initialOffset The lambda to provide initial offset on the plane.
+ * @return Instance of the [ProgramGuideState].
+ */
+@Composable
+public fun rememberSaveableProgramGuideState(
+    initialOffset: ProgramGuidePositionProvider.() -> Offset = { Offset.Zero },
+): ProgramGuideState {
+    return rememberSaveable(
+        saver = ProgramGuideState.Saver(),
+        init = { ProgramGuideState(initialOffset) }
+    )
 }
 
 /**
@@ -156,5 +182,27 @@ public class ProgramGuideState(
     ) {
         val position = positionProvider.getTimelinePosition(index, alignment)
         minaBoxState.snapTo(position, translateY)
+    }
+
+    internal companion object {
+
+        /**
+         * Creates a [Saver] that can save and restore a [ProgramGuideState].
+         *
+         * @return A [Saver] instance for saving and restoring [ProgramGuideState].
+         */
+        fun Saver(): Saver<ProgramGuideState, *> = listSaver(
+            save = {
+                listOf(
+                    it.minaBoxState.translate?.x ?: 0f,
+                    it.minaBoxState.translate?.y ?: 0f,
+                )
+            },
+            restore = {
+                ProgramGuideState {
+                    Offset(it[0], it[1])
+                }
+            }
+        )
     }
 }

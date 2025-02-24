@@ -37,7 +37,7 @@ import eu.wewox.programguide.demo.ui.components.ProgramCell
 import eu.wewox.programguide.demo.ui.components.TimelineItemCell
 import eu.wewox.programguide.demo.ui.components.TopBar
 import eu.wewox.programguide.demo.ui.theme.SpacingSmall
-import eu.wewox.programguide.rememberProgramGuideState
+import eu.wewox.programguide.rememberSaveableProgramGuideState
 import kotlinx.coroutines.launch
 
 /**
@@ -59,7 +59,7 @@ fun ProgramGuideStateScreen(onBackClick: () -> Unit) {
         var programs by remember { mutableStateOf(createPrograms(channels, timeline)) }
 
         val scope = rememberCoroutineScope()
-        val state = rememberProgramGuideState(
+        val state = rememberSaveableProgramGuideState(
             initialOffset = {
                 val x = getCurrentTimePosition()
                 Offset(x, 0f)
