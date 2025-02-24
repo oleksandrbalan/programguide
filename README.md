@@ -10,7 +10,9 @@ Lazy layout to display program guide data on the two directional plane. It is bu
 
 ## Multiplatform
 
-Library supports [Android](https://developer.android.com/jetpack/compose), [iOS](https://github.com/JetBrains/compose-multiplatform-ios-android-template/#readme) and [Desktop](https://github.com/JetBrains/compose-multiplatform-desktop-template/#readme) (Windows, MacOS, Linux) targets.
+Library supports Android, iOS, Desktop (Windows, MacOS, Linux) and Wasm targets.
+
+https://www.jetbrains.com/compose-multiplatform/
 
 ## Usage
 
