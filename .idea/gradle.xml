@@ -16,6 +16,7 @@
             </builds>
           </compositeBuild>
         </compositeConfiguration>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="/usr/local/Cellar/gradle/7.4.2/libexec" />
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
@@ -28,9 +29,9 @@
             <option value="$PROJECT_DIR$/demo" />
             <option value="$PROJECT_DIR$/desktopdemo" />
             <option value="$PROJECT_DIR$/programguide" />
+            <option value="$PROJECT_DIR$/wasmdemo" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

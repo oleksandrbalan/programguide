@@ -2,7 +2,7 @@
   <artifact type="jar" name="demo-jvm">
     <output-path>$PROJECT_DIR$/demo/build/libs</output-path>
     <root id="archive" name="demo-jvm.jar">
-      <element id="module-output" name="ProgramGuide.demo.jvmMain" />
+      <element id="module-output" name="demo.ProgramGuide.demo.jvmMain" />
     </root>
   </artifact>
 </component>
